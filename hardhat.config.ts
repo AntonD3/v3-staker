@@ -38,7 +38,8 @@ if (process.env.RUN_COVERAGE == '1') {
   }
 }
 
-const config: HardhatUserConfig = {
+// TODO: HardhatUserConfig
+const config: any = {
   networks: {
     hardhat: {
       allowUnlimitedContractSize: false,
