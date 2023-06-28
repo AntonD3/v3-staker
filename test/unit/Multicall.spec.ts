@@ -1,4 +1,3 @@
-import { LoadFixtureFunction } from '../types'
 import { uniswapFixture, mintPosition, UniswapFixtureType } from '../shared/fixtures'
 import {
   getMaxTick,
@@ -15,31 +14,26 @@ import {
   defaultTicksArray,
   expect,
 } from '../shared'
-import { createFixtureLoader, provider } from '../shared/provider'
+import { provider } from '../shared/provider'
 import { HelperCommands, ERC20Helper, incentiveResultToStakeAdapter } from '../helpers'
 import { createTimeMachine } from '../shared/time'
 import { HelperTypes } from '../helpers/types'
-
-let loadFixture: LoadFixtureFunction
+import { getWallets } from '../shared/zkSyncUtils'
 
 describe('unit/Multicall', () => {
-  const actors = new ActorFixture(provider.getWallets(), provider)
+  const actors = new ActorFixture(getWallets(), provider)
   const incentiveCreator = actors.incentiveCreator()
   const lpUser0 = actors.lpUser0()
   const amountDesired = BNe18(10)
   const totalReward = BNe18(100)
   const erc20Helper = new ERC20Helper()
-  const Time = createTimeMachine(provider)
+  const Time = createTimeMachine()
   let helpers: HelperCommands
   let context: UniswapFixtureType
   const multicaller = actors.traderUser2()
 
-  before('loader', async () => {
-    loadFixture = createFixtureLoader(provider.getWallets(), provider)
-  })
-
   beforeEach('create fixture loader', async () => {
-    context = await loadFixture(uniswapFixture)
+    context = await uniswapFixture(getWallets(), provider)
     helpers = HelperCommands.fromTestContext(context, actors, provider)
   })
 
@@ -77,7 +71,7 @@ describe('unit/Multicall', () => {
       },
       totalReward,
     ])
-    await context.staker.connect(multicaller).multicall([createIncentiveTx], maxGas)
+    await(await context.staker.connect(multicaller).multicall([createIncentiveTx], maxGas)).wait()
 
     // expect((await context.staker.deposits(tokenId)).owner).to.eq(
     //   multicaller.address
@@ -113,7 +107,7 @@ describe('unit/Multicall', () => {
       startTime: incentive0.startTime + 2,
     })
 
-    await Time.setAndMine(incentive2.startTime)
+    await Time.set(incentive2.startTime)
 
     const tx = await context.staker
       .connect(multicaller)
@@ -156,7 +150,7 @@ describe('unit/Multicall', () => {
       ticks: [getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]), getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM])],
       createIncentiveResult: incentive0,
     })
-    await context.staker.connect(lpUser0).stakeToken(incentiveResultToStakeAdapter(incentive1), tokenId)
+    await(await context.staker.connect(lpUser0).stakeToken(incentiveResultToStakeAdapter(incentive1), tokenId)).wait()
 
     await Time.set(endTime)
 
@@ -196,7 +190,7 @@ describe('unit/Multicall', () => {
       createIncentiveResult: incentive,
     }
 
-    await Time.setAndMine(incentive.startTime + 1)
+    await Time.set(incentive.startTime + 1)
 
     const { tokenId: tokenId0 } = await helpers.mintDepositStakeFlow(params)
     const { tokenId: tokenId1 } = await helpers.mintDepositStakeFlow(params)
@@ -205,7 +199,7 @@ describe('unit/Multicall', () => {
     const unstake = (tokenId) =>
       context.staker.interface.encodeFunctionData('unstakeToken', [incentiveResultToStakeAdapter(incentive), tokenId])
 
-    await context.staker.connect(multicaller).multicall([unstake(tokenId0), unstake(tokenId1), unstake(tokenId2)])
+    await(await context.staker.connect(multicaller).multicall([unstake(tokenId0), unstake(tokenId1), unstake(tokenId2)])).wait()
 
     const { numberOfStakes: n0 } = await context.staker.deposits(tokenId0)
     expect(n0).to.eq(BN('0'))

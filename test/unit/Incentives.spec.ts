@@ -1,4 +1,3 @@
-import { LoadFixtureFunction } from '../types'
 import { uniswapFixture, UniswapFixtureType } from '../shared/fixtures'
 import {
   expect,
@@ -14,31 +13,26 @@ import {
   erc20Wrap,
   makeTimestamps,
 } from '../shared'
-import { createFixtureLoader, provider } from '../shared/provider'
+import { provider } from '../shared/provider'
 import { HelperCommands, ERC20Helper } from '../helpers'
 import { ContractParams } from '../../types/contractParams'
 import { createTimeMachine } from '../shared/time'
 import { HelperTypes } from '../helpers/types'
-
-let loadFixture: LoadFixtureFunction
+import { getWallets } from '../shared/zkSyncUtils'
 
 describe('unit/Incentives', async () => {
-  const actors = new ActorFixture(provider.getWallets(), provider)
+  const actors = new ActorFixture(getWallets(), provider)
   const incentiveCreator = actors.incentiveCreator()
   const totalReward = BNe18(100)
   const erc20Helper = new ERC20Helper()
-  const Time = createTimeMachine(provider)
+  const Time = createTimeMachine()
 
   let helpers: HelperCommands
   let context: UniswapFixtureType
   let timestamps: ContractParams.Timestamps
 
-  before('loader', async () => {
-    loadFixture = createFixtureLoader(provider.getWallets(), provider)
-  })
-
   beforeEach('create fixture loader', async () => {
-    context = await loadFixture(uniswapFixture)
+    context = await uniswapFixture(getWallets(), provider)
     helpers = HelperCommands.fromTestContext(context, actors, provider)
   })
 
@@ -56,7 +50,7 @@ describe('unit/Incentives', async () => {
 
         const { startTime, endTime } = makeTimestamps(await blockTimestamp())
 
-        return await context.staker.connect(incentiveCreator).createIncentive(
+        return await(await context.staker.connect(incentiveCreator).createIncentive(
           {
             rewardToken: params.rewardToken || context.rewardToken.address,
             pool: context.pool01,
@@ -65,7 +59,7 @@ describe('unit/Incentives', async () => {
             refundee: params.refundee || incentiveCreator.address,
           },
           totalReward
-        )
+        )).wait()
       }
     })
 
@@ -138,7 +132,7 @@ describe('unit/Incentives', async () => {
           pool: context.pool01,
         }
         await erc20Helper.ensureBalancesAndApprovals(actors.lpUser0(), rewardToken, BN(100), context.staker.address)
-        await context.staker.connect(actors.lpUser0()).createIncentive(incentiveKey, 100)
+        await(await context.staker.connect(actors.lpUser0()).createIncentive(incentiveKey, 100)).wait()
         const incentiveId = await context.testIncentiveId.compute(incentiveKey)
         let { totalRewardUnclaimed, totalSecondsClaimedX128, numberOfStakes } = await context.staker.incentives(
           incentiveId
@@ -159,12 +153,12 @@ describe('unit/Incentives', async () => {
         await erc20Helper.ensureBalancesAndApprovals(actors.lpUser0(), rewardToken, BN(50), context.staker.address)
 
         await Time.set(testTimestamps.startTime)
-        await context.staker
+        await(await context.staker
           .connect(actors.lpUser0())
           .multicall([
             context.staker.interface.encodeFunctionData('createIncentive', [incentiveKey, 50]),
             context.staker.interface.encodeFunctionData('stakeToken', [incentiveKey, tokenId]),
-          ])
+          ])).wait()
         ;({ totalRewardUnclaimed, totalSecondsClaimedX128, numberOfStakes } = await context.staker
           .connect(actors.lpUser0())
           .incentives(incentiveId))
@@ -200,7 +194,7 @@ describe('unit/Incentives', async () => {
           const params = makeTimestamps(await blockTimestamp(), 100_000)
 
           // Go to after the start time
-          await Time.setAndMine(params.startTime + 100)
+          await Time.set(params.startTime + 100)
 
           const now = await blockTimestamp()
           expect(now).to.be.greaterThan(params.startTime, 'test setup: before start time')
@@ -271,13 +265,13 @@ describe('unit/Incentives', async () => {
       })
 
       subject = async (params: Partial<ContractParams.EndIncentive> = {}) => {
-        return await context.staker.connect(incentiveCreator).endIncentive({
+        return await(await context.staker.connect(incentiveCreator).endIncentive({
           rewardToken: params.rewardToken || context.rewardToken.address,
           pool: context.pool01,
           startTime: params.startTime || timestamps.startTime,
           endTime: params.endTime || timestamps.endTime,
           refundee: incentiveCreator.address,
-        })
+        })).wait()
       }
     })
 

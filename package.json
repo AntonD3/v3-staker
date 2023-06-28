@@ -16,10 +16,6 @@
   "files": [
     "contracts",
     "!contracts/test",
-    "artifacts/contracts/**/*.json",
-    "!artifacts/contracts/**/*.dbg.json",
-    "!artifacts/contracts/test/**/*",
-    "!artifacts/contracts/base/**/*",
     "artifacts-zk/contracts/**/*.json",
     "!artifacts-zk/contracts/**/*.dbg.json",
     "!artifacts-zk/contracts/test/**/*",
@@ -34,6 +30,7 @@
     "@uniswap/v3-periphery": "https://github.com/AntonD3/v3-periphery.git#v1.0.1-zksync-era"
   },
   "devDependencies": {
+    "@matterlabs/hardhat-zksync-deploy": "^0.6.3",
     "@matterlabs/hardhat-zksync-solc": "^0.3.16",
     "@matterlabs/hardhat-zksync-verify": "^0.1.5",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
@@ -53,7 +50,7 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-unused-imports": "^1.1.1",
     "ethereum-waffle": "^3.0.2",
-    "ethers": "^5.0.8",
+    "ethers": "^5.7.0",
     "hardhat": "^2.2.0",
     "hardhat-contract-sizer": "^2.0.3",
     "lodash": "^4.17.21",
@@ -76,6 +73,7 @@
     "size-contracts": "hardhat compile && hardhat size-contracts",
     "test": "hardhat test",
     "clear-cache": "rm -rf artifacts/ cache/ typechain/",
-    "coverage": "RUN_COVERAGE=1 hardhat coverage"
+    "coverage": "RUN_COVERAGE=1 hardhat coverage",
+    "local-setup": "./scripts/start-local-setup.sh"
   }
 }

@@ -1,5 +1,4 @@
-import { MockProvider } from 'ethereum-waffle'
-import { Wallet } from 'ethers'
+import { Wallet, Provider } from 'zksync-web3'
 
 export const WALLET_USER_INDEXES = {
   WETH_OWNER: 0,
@@ -12,12 +11,12 @@ export const WALLET_USER_INDEXES = {
   TRADER_USER_0: 7,
   TRADER_USER_1: 8,
   TRADER_USER_2: 9,
-  INCENTIVE_CREATOR: 10,
+  INCENTIVE_CREATOR: 9, // There are only 10 rich wallets in the zksync local-setup
 }
 
 export class ActorFixture {
   wallets: Array<Wallet>
-  provider: MockProvider
+  provider: Provider
 
   constructor(wallets, provider) {
     this.wallets = wallets

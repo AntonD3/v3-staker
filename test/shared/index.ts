@@ -21,15 +21,12 @@ import { jestSnapshotPlugin } from 'mocha-chai-jest-snapshot'
 import { IUniswapV3Pool, TestERC20 } from '../../typechain'
 import { isArray, isString } from 'lodash'
 import { ethers } from 'hardhat'
+import { getTimeSimulator } from './zkSyncUtils'
 
 export const { MaxUint256 } = constants
 
 export const blockTimestamp = async () => {
-  const block = await provider.getBlock('latest')
-  if (!block) {
-    throw new Error('null block returned from provider')
-  }
-  return block.timestamp
+  return (await (await getTimeSimulator()).blockTimestamp()).toNumber()
 }
 
 bn.config({ EXPONENTIAL_AT: 999999, DECIMAL_PLACES: 40 })

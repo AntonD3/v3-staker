@@ -1,5 +1,5 @@
 import { constants } from 'ethers'
-import { TestContext, LoadFixtureFunction } from './types'
+import { TestContext } from './types'
 import { TestERC20 } from '../typechain'
 import {
   BigNumber,
@@ -22,23 +22,17 @@ import {
 } from './shared'
 import { createTimeMachine } from './shared/time'
 import { ERC20Helper, HelperCommands, incentiveResultToStakeAdapter } from './helpers'
-import { createFixtureLoader, provider } from './shared/provider'
+import { provider } from './shared/provider'
 import { ActorFixture } from './shared/actors'
-import { Fixture } from 'ethereum-waffle'
 import { HelperTypes } from './helpers/types'
 import { Wallet } from '@ethersproject/wallet'
-
-let loadFixture: LoadFixtureFunction
+import { getWallets } from './shared/zkSyncUtils'
 
 describe('integration', async () => {
-  const wallets = provider.getWallets()
-  const Time = createTimeMachine(provider)
+  const wallets = getWallets()
+  const Time = createTimeMachine()
   const actors = new ActorFixture(wallets, provider)
   const e20h = new ERC20Helper()
-
-  before('create fixture loader', async () => {
-    loadFixture = createFixtureLoader(wallets, provider)
-  })
 
   describe('there are three LPs in the same range', async () => {
     type TestSubject = {
@@ -57,7 +51,7 @@ describe('integration', async () => {
     ]
     const amountsToStake: [BigNumber, BigNumber] = [BNe18(1_000), BNe18(1_000)]
 
-    const scenario: Fixture<TestSubject> = async (_wallets, _provider) => {
+    const scenario = async (_wallets, _provider): Promise<TestSubject> => {
       const context = await uniswapFixture(_wallets, _provider)
       const epoch = await blockTimestamp()
 
@@ -88,14 +82,15 @@ describe('integration', async () => {
 
       await Time.set(startTime + 1)
 
-      const stakes = await Promise.all(
-        actors.lpUsers().map((lp) =>
-          helpers.mintDepositStakeFlow({
+      let stakes: HelperTypes.MintDepositStake.Result[] = []
+      for(const lp of actors.lpUsers()) {
+        stakes.push(
+          await helpers.mintDepositStakeFlow({
             ...params,
             lp,
           })
         )
-      )
+      }
 
       return {
         context,
@@ -106,14 +101,14 @@ describe('integration', async () => {
     }
 
     beforeEach('load fixture', async () => {
-      subject = await loadFixture(scenario)
+      subject = await scenario(wallets, provider)
     })
 
     describe('who all stake the entire time ', () => {
       it('allows them all to withdraw at the end', async () => {
         const { helpers, createIncentiveResult } = subject
 
-        await Time.setAndMine(createIncentiveResult.endTime + 1)
+        await Time.set(createIncentiveResult.endTime + 1)
 
         // Sanity check: make sure we go past the incentive end time.
         expect(await blockTimestamp(), 'test setup: must be run after start time').to.be.gte(
@@ -177,7 +172,7 @@ describe('integration', async () => {
             .withArgs(stakes[0].tokenId, incentiveId)
 
           // It does not allow them to claim rewards (since we're past end time)
-          await actions.doClaimRewards(stakes[0])
+          await(await actions.doClaimRewards(stakes[0])).wait()
 
           // Owner is still the staker
           expect(await nft.ownerOf(stakes[0].tokenId)).to.eq(staker.address)
@@ -201,7 +196,7 @@ describe('integration', async () => {
         const { startTime, endTime } = createIncentiveResult
 
         // Halfway through, lp0 decides they want out. Pauvre lp0.
-        await Time.setAndMine(startTime + duration / 2)
+        await Time.set(startTime + duration / 2)
 
         const [lpUser0] = actors.lpUsers()
         let unstakes: Array<HelperTypes.UnstakeCollectBurn.Result> = []
@@ -226,7 +221,7 @@ describe('integration', async () => {
         expect(unstakes[0].balance).to.beWithin(BNe(1, 15), BN('499989197530864021534'))
 
         // Now the other two LPs hold off till the end and unstake
-        await Time.setAndMine(endTime + 1)
+        await Time.set(endTime + 1)
         const otherUnstakes = await Promise.all(
           stakes.slice(1).map(({ lp, tokenId }) =>
             helpers.unstakeCollectBurnFlow({
@@ -333,7 +328,7 @@ describe('integration', async () => {
           })
 
           // Now, go to the end and get rewards
-          await Time.setAndMine(endTime + 1)
+          await Time.set(endTime + 1)
 
           const unstakes = await Promise.all(
             stakes.concat(extraStake).map(({ lp, tokenId }) =>
@@ -447,7 +442,7 @@ describe('integration', async () => {
     const duration = days(100)
     const baseAmount = BNe18(2)
 
-    const scenario: Fixture<TestSubject> = async (_wallets, _provider) => {
+    const scenario = async (_wallets, _provider): Promise<TestSubject> => {
       const context = await uniswapFixture(_wallets, _provider)
 
       const helpers = HelperCommands.fromTestContext(context, new ActorFixture(_wallets, _provider), _provider)
@@ -472,7 +467,7 @@ describe('integration', async () => {
     }
 
     beforeEach('load fixture', async () => {
-      subject = await loadFixture(scenario)
+      subject = await scenario(wallets, provider)
     })
 
     it('rewards based on how long they are in range', async () => {
@@ -508,10 +503,11 @@ describe('integration', async () => {
 
       const tokensToStake: [TestERC20, TestERC20] = [context.tokens[0], context.tokens[1]]
 
-      Time.set(createIncentiveResult.startTime + 1)
-      const stakes = await Promise.all(
-        positions.map((p) =>
-          helpers.mintDepositStakeFlow({
+      await Time.set(createIncentiveResult.startTime + 1)
+      let stakes: HelperTypes.MintDepositStake.Result[] = []
+      for(const p of positions) {
+        stakes.push(
+          await helpers.mintDepositStakeFlow({
             lp: p.lp,
             tokensToStake,
             ticks: p.ticks,
@@ -519,7 +515,7 @@ describe('integration', async () => {
             createIncentiveResult,
           })
         )
-      )
+      }
 
       const trader = actors.traderUser0()
 

@@ -7,3 +7,4 @@ typechain/
 *.code-workspace
 dist/
 coverage/
+local-setup/

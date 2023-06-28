@@ -1,5 +1,4 @@
 import { constants, BigNumberish, Wallet } from 'ethers'
-import { LoadFixtureFunction } from '../types'
 import { ethers } from 'hardhat'
 import { uniswapFixture, mintPosition, UniswapFixtureType } from '../shared/fixtures'
 import {
@@ -16,32 +15,27 @@ import {
   makeTimestamps,
   maxGas,
 } from '../shared'
-import { createFixtureLoader, provider } from '../shared/provider'
+import { provider } from '../shared/provider'
 import { HelperCommands, ERC20Helper, incentiveResultToStakeAdapter } from '../helpers'
 
 import { ContractParams } from '../../types/contractParams'
 import { createTimeMachine } from '../shared/time'
 import { HelperTypes } from '../helpers/types'
-
-let loadFixture: LoadFixtureFunction
+import { getWallets } from '../shared/zkSyncUtils'
 
 describe('unit/Deposits', () => {
-  const actors = new ActorFixture(provider.getWallets(), provider)
+  const actors = new ActorFixture(getWallets(), provider)
   const lpUser0 = actors.lpUser0()
   const amountDesired = BNe18(10)
   const totalReward = BNe18(100)
   const erc20Helper = new ERC20Helper()
-  const Time = createTimeMachine(provider)
+  const Time = createTimeMachine()
   let helpers: HelperCommands
   const incentiveCreator = actors.incentiveCreator()
   let context: UniswapFixtureType
 
-  before('loader', async () => {
-    loadFixture = createFixtureLoader(provider.getWallets(), provider)
-  })
-
   beforeEach('create fixture loader', async () => {
-    context = await loadFixture(uniswapFixture)
+    context = await uniswapFixture(getWallets(), provider)
     helpers = HelperCommands.fromTestContext(context, actors, provider)
   })
 
@@ -107,7 +101,7 @@ describe('unit/Deposits', () => {
         totalReward,
       })
 
-      await Time.setAndMine(startTime + 1)
+      await Time.set(startTime + 1)
 
       // Make sure we're starting from a clean slate
       const depositBefore = await context.staker.deposits(tokenId)
@@ -115,12 +109,12 @@ describe('unit/Deposits', () => {
       expect(depositBefore.numberOfStakes).to.eq(0)
 
       subject = async (data: string, actor: Wallet = lpUser0) => {
-        await context.nft
+        await(await context.nft
           .connect(actor)
           [SAFE_TRANSFER_FROM_SIGNATURE](actor.address, context.staker.address, tokenId, data, {
             ...maxGas,
             from: actor.address,
-          })
+          })).wait()
       }
     })
 
@@ -156,7 +150,7 @@ describe('unit/Deposits', () => {
         totalReward,
       })
 
-      await Time.setAndMine(createIncentiveResult2.startTime)
+      await Time.set(createIncentiveResult2.startTime)
 
       const data = ethers.utils.defaultAbiCoder.encode(
         [`${INCENTIVE_KEY_ABI}[]`],
@@ -264,12 +258,12 @@ describe('unit/Deposits', () => {
 
       it('deposits the token', async () => {
         expect((await context.staker.deposits(tokenId)).owner).to.equal(constants.AddressZero)
-        await context.nft
+        await(await context.nft
           .connect(lpUser0)
           ['safeTransferFrom(address,address,uint256)'](lpUser0.address, context.staker.address, tokenId, {
             ...maxGas,
             from: lpUser0.address,
-          })
+          })).wait()
 
         expect((await context.staker.deposits(tokenId)).owner).to.equal(lpUser0.address)
       })
@@ -285,12 +279,12 @@ describe('unit/Deposits', () => {
         await Time.set(timestamps.startTime + 10)
         const stakeBefore = await context.staker.stakes(tokenId, incentiveId)
         const depositBefore = await context.staker.deposits(tokenId)
-        await context.nft
+        await(await context.nft
           .connect(lpUser0)
           ['safeTransferFrom(address,address,uint256,bytes)'](lpUser0.address, context.staker.address, tokenId, data, {
             ...maxGas,
             from: lpUser0.address,
-          })
+          })).wait()
         const stakeAfter = await context.staker.stakes(tokenId, incentiveId)
 
         expect(depositBefore.numberOfStakes).to.equal(0)
@@ -351,11 +345,11 @@ describe('unit/Deposits', () => {
 
   describe('#withdrawToken', () => {
     beforeEach(async () => {
-      await context.nft
+      await(await context.nft
         .connect(lpUser0)
-        ['safeTransferFrom(address,address,uint256)'](lpUser0.address, context.staker.address, tokenId)
+        ['safeTransferFrom(address,address,uint256)'](lpUser0.address, context.staker.address, tokenId)).wait()
 
-      subject = (_tokenId, _recipient) => context.staker.connect(lpUser0).withdrawToken(_tokenId, _recipient, '0x')
+      subject = async (_tokenId, _recipient) => await(await context.staker.connect(lpUser0).withdrawToken(_tokenId, _recipient, '0x')).wait()
     })
 
     describe('works and', () => {
@@ -401,15 +395,15 @@ describe('unit/Deposits', () => {
           ...timestamps,
         }
         const incentive = await helpers.createIncentiveFlow(incentiveParams)
-        await Time.setAndMine(timestamps.startTime + 1)
-        await context.staker.connect(lpUser0).stakeToken(
+        await Time.set(timestamps.startTime + 1)
+        await(await context.staker.connect(lpUser0).stakeToken(
           {
             ...incentive,
             pool: context.pool01,
             rewardToken: incentive.rewardToken.address,
           },
           tokenId
-        )
+        )).wait()
 
         await expect(subject(tokenId, lpUser0.address)).to.revertedWith(
           'UniswapV3Staker::withdrawToken: cannot withdraw token while staked'
@@ -421,9 +415,9 @@ describe('unit/Deposits', () => {
   describe('#transferDeposit', () => {
     const lpUser1 = actors.lpUser1()
     beforeEach('create a deposit by lpUser0', async () => {
-      await context.nft
+      await(await context.nft
         .connect(lpUser0)
-        ['safeTransferFrom(address,address,uint256)'](lpUser0.address, context.staker.address, tokenId)
+        ['safeTransferFrom(address,address,uint256)'](lpUser0.address, context.staker.address, tokenId)).wait()
     })
 
     it('emits a DepositTransferred event', () =>
@@ -433,7 +427,7 @@ describe('unit/Deposits', () => {
 
     it('transfers nft ownership', async () => {
       const { owner: ownerBefore } = await context.staker.deposits(tokenId)
-      await context.staker.connect(lpUser0).transferDeposit(tokenId, lpUser1.address)
+      await(await context.staker.connect(lpUser0).transferDeposit(tokenId, lpUser1.address)).wait()
       const { owner: ownerAfter } = await context.staker.deposits(tokenId)
       expect(ownerBefore).to.eq(lpUser0.address)
       expect(ownerAfter).to.eq(lpUser1.address)

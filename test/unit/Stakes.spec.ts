@@ -1,5 +1,4 @@
 import { BigNumber, Wallet } from 'ethers'
-import { LoadFixtureFunction } from '../types'
 import { TestERC20 } from '../../typechain'
 import { uniswapFixture, mintPosition, UniswapFixtureType } from '../shared/fixtures'
 import {
@@ -17,33 +16,28 @@ import {
   makeTimestamps,
   maxGas,
 } from '../shared'
-import { createFixtureLoader, provider } from '../shared/provider'
+import { provider } from '../shared/provider'
 import { HelperCommands, ERC20Helper, incentiveResultToStakeAdapter } from '../helpers'
 import { ContractParams } from '../../types/contractParams'
 import { createTimeMachine } from '../shared/time'
 import { HelperTypes } from '../helpers/types'
-
-let loadFixture: LoadFixtureFunction
+import { getWallets } from '../shared/zkSyncUtils'
 
 describe('unit/Stakes', () => {
-  const actors = new ActorFixture(provider.getWallets(), provider)
+  const actors = new ActorFixture(getWallets(), provider)
   const incentiveCreator = actors.incentiveCreator()
   const lpUser0 = actors.lpUser0()
   const amountDesired = BNe18(10)
   const totalReward = BNe18(100)
   const erc20Helper = new ERC20Helper()
-  const Time = createTimeMachine(provider)
+  const Time = createTimeMachine()
   let helpers: HelperCommands
   let context: UniswapFixtureType
   let timestamps: ContractParams.Timestamps
   let tokenId: string
 
-  before('loader', async () => {
-    loadFixture = createFixtureLoader(provider.getWallets(), provider)
-  })
-
   beforeEach('create fixture loader', async () => {
-    context = await loadFixture(uniswapFixture)
+    context = await uniswapFixture(getWallets(), provider)
     helpers = HelperCommands.fromTestContext(context, actors, provider)
   })
 
@@ -53,7 +47,7 @@ describe('unit/Stakes', () => {
     let subject: (_tokenId: string, _actor: Wallet) => Promise<any>
 
     beforeEach(async () => {
-      context = await loadFixture(uniswapFixture)
+      context = await uniswapFixture(getWallets(), provider)
       helpers = HelperCommands.fromTestContext(context, actors, provider)
 
       /* We will be doing a lot of time-testing here, so leave some room between
@@ -81,9 +75,9 @@ describe('unit/Stakes', () => {
         deadline: (await blockTimestamp()) + 1000,
       })
 
-      await context.nft
+      await(await context.nft
         .connect(lpUser0)
-        ['safeTransferFrom(address,address,uint256)'](lpUser0.address, context.staker.address, tokenId)
+        ['safeTransferFrom(address,address,uint256)'](lpUser0.address, context.staker.address, tokenId)).wait()
 
       incentiveArgs = {
         rewardToken: context.rewardToken,
@@ -94,8 +88,8 @@ describe('unit/Stakes', () => {
 
       incentiveId = await helpers.getIncentiveId(await helpers.createIncentiveFlow(incentiveArgs))
 
-      subject = (_tokenId: string, _actor: Wallet) =>
-        context.staker.connect(_actor).stakeToken(
+      subject = async (_tokenId: string, _actor: Wallet) =>
+        await(await context.staker.connect(_actor).stakeToken(
           {
             refundee: incentiveCreator.address,
             pool: context.pool01,
@@ -103,7 +97,7 @@ describe('unit/Stakes', () => {
             ...timestamps,
           },
           _tokenId
-        )
+        )).wait()
     })
 
     describe('works and', () => {
@@ -193,19 +187,19 @@ describe('unit/Stakes', () => {
           deadline: (await blockTimestamp()) + 1000,
         })
 
-        await context.nft.connect(lpUser0).decreaseLiquidity({
+        await(await context.nft.connect(lpUser0).decreaseLiquidity({
           tokenId: tokenId2,
           liquidity: (await context.nft.positions(tokenId2)).liquidity,
           amount0Min: 0,
           amount1Min: 0,
           deadline: (await blockTimestamp()) + 1_000,
-        })
+        })).wait()
 
-        await context.nft
+        await(await context.nft
           .connect(lpUser0)
           ['safeTransferFrom(address,address,uint256)'](lpUser0.address, context.staker.address, tokenId2, {
             ...maxGas,
-          })
+          })).wait()
 
         await expect(subject(tokenId2, lpUser0)).to.be.revertedWith(
           'UniswapV3Staker::stakeToken: cannot stake token with 0 liquidity'
@@ -222,7 +216,7 @@ describe('unit/Stakes', () => {
           tokens: [context.token1, context.rewardToken],
         })
 
-        await Time.setAndMine(incentive2.startTime + 1)
+        await Time.set(incentive2.startTime + 1)
 
         await helpers.depositFlow({
           lp: lpUser0,
@@ -243,7 +237,7 @@ describe('unit/Stakes', () => {
       })
 
       it('incentive key does not exist', async () => {
-        await Time.setAndMine(timestamps.startTime + 20)
+        await Time.set(timestamps.startTime + 20)
 
         await expect(
           context.staker.connect(lpUser0).stakeToken(
@@ -287,9 +281,9 @@ describe('unit/Stakes', () => {
       })
       tokenId = mintResult.tokenId
 
-      await context.nft
+      await(await context.nft
         .connect(lpUser0)
-        ['safeTransferFrom(address,address,uint256)'](lpUser0.address, context.staker.address, tokenId)
+        ['safeTransferFrom(address,address,uint256)'](lpUser0.address, context.staker.address, tokenId)).wait()
 
       stakeIncentiveKey = {
         refundee: incentiveCreator.address,
@@ -315,7 +309,8 @@ describe('unit/Stakes', () => {
     it('returns correct rewardAmount and secondsInsideX128 for the position', async () => {
       const pool = context.poolObj.connect(actors.lpUser0())
 
-      await provider.send('evm_mine', [timestamps.startTime + 100])
+      // await provider.send('evm_mine', [timestamps.startTime + 100])
+      await Time.set(timestamps.startTime + 100)
 
       const rewardInfo = await context.staker.connect(lpUser0).getRewardInfo(stakeIncentiveKey, tokenId)
 
@@ -333,7 +328,7 @@ describe('unit/Stakes', () => {
     })
 
     it('returns nonzero for incentive after end time', async () => {
-      await Time.setAndMine(timestamps.endTime + 1)
+      await Time.set(timestamps.endTime + 1)
 
       const rewardInfo = await context.staker.connect(lpUser0).getRewardInfo(stakeIncentiveKey, tokenId)
 
@@ -342,7 +337,7 @@ describe('unit/Stakes', () => {
     })
 
     it('reverts if stake does not exist', async () => {
-      await Time.setAndMine(timestamps.endTime + 1)
+      await Time.set(timestamps.endTime + 1)
 
       await expect(context.staker.connect(lpUser0).getRewardInfo(stakeIncentiveKey, '100')).to.be.revertedWith(
         'UniswapV3Staker::getRewardInfo: stake does not exist'
@@ -369,7 +364,7 @@ describe('unit/Stakes', () => {
         ...timestamps,
       })
 
-      await Time.setAndMine(timestamps.startTime + 1)
+      await Time.set(timestamps.startTime + 1)
 
       const mintResult = await helpers.mintDepositStakeFlow({
         lp: lpUser0,
@@ -380,8 +375,8 @@ describe('unit/Stakes', () => {
       })
       tokenId = mintResult.tokenId
 
-      await Time.setAndMine(timestamps.endTime - 1)
-      await context.staker.connect(lpUser0).unstakeToken(
+      await Time.set(timestamps.endTime - 1)
+      await(await context.staker.connect(lpUser0).unstakeToken(
         {
           refundee: incentiveCreator.address,
           rewardToken: context.rewardToken.address,
@@ -389,12 +384,12 @@ describe('unit/Stakes', () => {
           ...timestamps,
         },
         tokenId
-      )
+      )).wait()
 
       claimable = await context.staker.rewards(context.rewardToken.address, lpUser0.address)
 
-      subject = (_token: string, _to: string, _amount: BigNumber) =>
-        context.staker.connect(lpUser0).claimReward(_token, _to, _amount)
+      subject = async (_token: string, _to: string, _amount: BigNumber) =>
+        await(await context.staker.connect(lpUser0).claimReward(_token, _to, _amount)).wait()
     })
 
     describe('when requesting the full amount', () => {
@@ -510,13 +505,13 @@ describe('unit/Stakes', () => {
         deadline: (await blockTimestamp()) + 1000,
       })
 
-      await context.nft
+      await(await context.nft
         .connect(lpUser0)
-        ['safeTransferFrom(address,address,uint256)'](lpUser0.address, context.staker.address, tokenId)
+        ['safeTransferFrom(address,address,uint256)'](lpUser0.address, context.staker.address, tokenId)).wait()
 
-      await Time.setAndMine(timestamps.startTime + 1)
+      await Time.set(timestamps.startTime + 1)
 
-      await context.staker.connect(lpUser0).stakeToken(
+      await(await context.staker.connect(lpUser0).stakeToken(
         {
           refundee: incentiveCreator.address,
           rewardToken: context.rewardToken.address,
@@ -524,12 +519,12 @@ describe('unit/Stakes', () => {
           ...timestamps,
         },
         tokenId
-      )
+      )).wait()
 
       incentiveId = await helpers.getIncentiveId(createIncentiveResult)
 
-      subject = (_actor: Wallet) =>
-        context.staker.connect(_actor).unstakeToken(
+      subject = async (_actor: Wallet) =>
+        await(await context.staker.connect(_actor).unstakeToken(
           {
             refundee: incentiveCreator.address,
             pool: context.pool01,
@@ -537,7 +532,7 @@ describe('unit/Stakes', () => {
             ...timestamps,
           },
           tokenId
-        )
+        )).wait()
     })
 
     describe('works and', () => {
@@ -583,7 +578,7 @@ describe('unit/Stakes', () => {
       describe('after the end time', () => {
         beforeEach(async () => {
           // Fast-forward to after the end time
-          await Time.setAndMine(timestamps.endTime + 1)
+          await Time.set(timestamps.endTime + 1)
         })
 
         it('anyone can unstake', async () => {
@@ -601,7 +596,7 @@ describe('unit/Stakes', () => {
 
     describe('fails if', () => {
       it('stake has already been unstaked', async () => {
-        await Time.setAndMine(timestamps.endTime + 1)
+        await Time.set(timestamps.endTime + 1)
         await subject(lpUser0)
         await expect(subject(lpUser0)).to.revertedWith('UniswapV3Staker::unstakeToken: stake does not exist')
       })
@@ -614,7 +609,7 @@ describe('unit/Stakes', () => {
 
       it('non-owner tries to unstake before the end time', async () => {
         const nonOwner = actors.lpUser2()
-        await Time.setAndMine(timestamps.startTime + 100)
+        await Time.set(timestamps.startTime + 100)
         await expect(subject(nonOwner)).to.revertedWith('UniswapV3Staker::unstakeToken: only owner can withdraw token')
         expect(await blockTimestamp(), 'test setup: after end time').to.be.lt(timestamps.endTime)
       })
@@ -636,7 +631,7 @@ describe('unit/Stakes', () => {
         ...timestamps,
       })
       incentiveId = await helpers.getIncentiveId(incentive)
-      await Time.setAndMine(timestamps.startTime + 1)
+      await Time.set(timestamps.startTime + 1)
     })
 
     it('works when no overflow', async () => {
@@ -656,7 +651,7 @@ describe('unit/Stakes', () => {
         tokenId,
       })
 
-      await context.staker.connect(lpUser0).stakeToken(incentiveResultToStakeAdapter(incentive), tokenId)
+      await(await context.staker.connect(lpUser0).stakeToken(incentiveResultToStakeAdapter(incentive), tokenId)).wait()
       const { liquidity } = await context.staker.stakes(tokenId, incentiveId)
       expect(liquidity).to.be.lt(MAX_UINT_96)
     })
@@ -677,7 +672,7 @@ describe('unit/Stakes', () => {
         tokenId,
       })
 
-      await context.staker.connect(lpUser0).stakeToken(incentiveResultToStakeAdapter(incentive), tokenId)
+      await(await context.staker.connect(lpUser0).stakeToken(incentiveResultToStakeAdapter(incentive), tokenId)).wait()
       const { liquidity } = await context.staker.stakes(tokenId, incentiveId)
       expect(liquidity).to.be.gt(MAX_UINT_96)
     })

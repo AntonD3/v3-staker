@@ -1,14 +1,13 @@
 import { BigNumber } from 'ethers'
-import { ethers } from 'hardhat'
 import { TestRewardMath } from '../../../typechain'
 import { expect } from '../../shared'
+import { deployContract, getWallets } from '../../shared/zkSyncUtils'
 
 describe('unit/RewardMath', () => {
   let rewardMath: TestRewardMath
 
   before('setup test reward math', async () => {
-    const factory = await ethers.getContractFactory('TestRewardMath')
-    rewardMath = (await factory.deploy()) as TestRewardMath
+    rewardMath = (await deployContract(getWallets()[0], 'TestRewardMath')) as TestRewardMath
   })
 
   it('half the liquidity over 20% of the total duration', async () => {
