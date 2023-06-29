@@ -8,7 +8,6 @@ import '@matterlabs/hardhat-zksync-deploy'
 import '@matterlabs/hardhat-zksync-solc'
 import '@matterlabs/hardhat-zksync-verify'
 
-import { HardhatUserConfig } from 'hardhat/config'
 import { SolcUserConfig } from 'hardhat/types'
 import { subtask } from 'hardhat/config'
 import * as path from 'path'
@@ -68,7 +67,6 @@ if (process.env.RUN_COVERAGE == '1') {
   }
 }
 
-// TODO: HardhatUserConfig
 const config: any = {
   networks: {
     zkSyncLocalhost: {
@@ -77,10 +75,16 @@ const config: any = {
       zksync: true,
     },
     zkSyncTestnet: {
-      url: "https://testnet.era.zksync.dev",
+      url: 'https://testnet.era.zksync.dev',
       ethNetwork: `https://goerli.infura.io/v3/${process.env.INFURA_API_KEY}`,
       zksync: true,
       verifyURL: 'https://zksync2-testnet-explorer.zksync.dev/contract_verification'
+    },
+    zkSyncMainnet: {
+      url: 'https://mainnet.era.zksync.io',
+      ethNetwork: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      zksync: true,
+      verifyURL: 'https://zksync2-mainnet-explorer.zksync.io/contract_verification'
     },
   },
   defaultNetwork: 'zkSyncLocalhost',
@@ -88,7 +92,7 @@ const config: any = {
     compilers: [DEFAULT_COMPILER_SETTINGS],
   },
   zksolc: {
-    version: "1.3.10",
+    version: "1.3.12",
     compilerSource: "binary",
     settings: {
       metadata: {

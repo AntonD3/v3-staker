@@ -1504,15 +1504,15 @@
 
 "@uniswap/v2-core@https://github.com/AntonD3/v2-core.git#v1.0.1-zksync-era":
   version "1.0.1"
-  resolved "https://github.com/AntonD3/v2-core.git#b42527f0cb5fece260e2a1110e1bacbc254cb2d3"
+  resolved "https://github.com/AntonD3/v2-core.git#0ce72c31df25108e7301536085eca9f00460301e"
 
 "@uniswap/v3-core@https://github.com/AntonD3/v3-core.git#v1.0.0-zksync-era":
   version "1.0.0"
-  resolved "https://github.com/AntonD3/v3-core.git#f8ca660b2c470e3746b710c31588a03737d30ef1"
+  resolved "https://github.com/AntonD3/v3-core.git#32a847aba1aa842012b11491a65cac86bef1b7a8"
 
 "@uniswap/v3-periphery@https://github.com/AntonD3/v3-periphery.git#v1.0.1-zksync-era":
   version "1.0.1"
-  resolved "https://github.com/AntonD3/v3-periphery.git#f12c8211f990b5ff2463816b6ec7a3aca692e324"
+  resolved "https://github.com/AntonD3/v3-periphery.git#91785066548d5bcd854e927b5675a9920ca3b206"
   dependencies:
     "@openzeppelin/contracts" "3.4.1-solc-0.7-2"
     "@uniswap/lib" "^4.0.1-alpha"
@@ -5450,11 +5450,6 @@ hardhat-contract-sizer@^2.0.3:
   dependencies:
     cli-table3 "^0.6.0"
     colors "^1.4.0"
-
-hardhat-dependency-compiler@^1.1.3:
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/hardhat-dependency-compiler/-/hardhat-dependency-compiler-1.1.3.tgz#1e49e23f68878bd713f860c66648a711bc4a4a79"
-  integrity sha512-bCDqsOxGST6WkbMvj4lPchYWidNSSBm5CFnkyAex1T11cGmr9otZTGl81W6f9pmrtBXbKCvr3OSuNJ6Q394sAw==
 
 hardhat@^2.2.0:
   version "2.2.1"
