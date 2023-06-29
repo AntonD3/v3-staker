@@ -349,7 +349,7 @@ describe('unit/Deposits', () => {
         .connect(lpUser0)
         ['safeTransferFrom(address,address,uint256)'](lpUser0.address, context.staker.address, tokenId)).wait()
 
-      subject = async (_tokenId, _recipient) => await(await context.staker.connect(lpUser0).withdrawToken(_tokenId, _recipient, '0x')).wait()
+      subject = async (_tokenId, _recipient) => context.staker.connect(lpUser0).withdrawToken(_tokenId, _recipient, '0x')
     })
 
     describe('works and', () => {
@@ -359,19 +359,19 @@ describe('unit/Deposits', () => {
           .withArgs(tokenId, recipient, constants.AddressZero))
 
       it('transfers nft ownership', async () => {
-        await subject(tokenId, recipient)
+        await(await subject(tokenId, recipient)).wait()
         expect(await context.nft.ownerOf(tokenId)).to.eq(recipient)
       })
 
       it('prevents you from withdrawing twice', async () => {
-        await subject(tokenId, recipient)
+        await(await subject(tokenId, recipient)).wait()
         expect(await context.nft.ownerOf(tokenId)).to.eq(recipient)
         await expect(subject(tokenId, recipient)).to.be.reverted
       })
 
       it('deletes deposit upon withdrawal', async () => {
         expect((await context.staker.deposits(tokenId)).owner).to.equal(lpUser0.address)
-        await subject(tokenId, recipient)
+        await(await subject(tokenId, recipient)).wait()
         expect((await context.staker.deposits(tokenId)).owner).to.equal(constants.AddressZero)
       })
 

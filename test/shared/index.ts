@@ -21,7 +21,7 @@ import { jestSnapshotPlugin } from 'mocha-chai-jest-snapshot'
 import { IUniswapV3Pool, TestERC20 } from '../../typechain'
 import { isArray, isString } from 'lodash'
 import { ethers } from 'hardhat'
-import { getTimeSimulator } from './zkSyncUtils'
+import { getTimeSimulator, loadArtifact, getWallets } from './zkSyncUtils'
 
 export const { MaxUint256 } = constants
 
@@ -131,8 +131,8 @@ export const arrayWrap = (x: any) => {
 
 export const erc20Wrap = async (x: string | TestERC20): Promise<TestERC20> => {
   if (isString(x)) {
-    const factory = await ethers.getContractFactory('TestERC20')
-    return factory.attach(x) as TestERC20
+    const artifact = await loadArtifact('TestERC20')
+    return new ethers.Contract(x, artifact.abi, getWallets()[0]) as TestERC20
   }
   return x
 }

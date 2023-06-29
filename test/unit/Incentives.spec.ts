@@ -50,7 +50,7 @@ describe('unit/Incentives', async () => {
 
         const { startTime, endTime } = makeTimestamps(await blockTimestamp())
 
-        return await(await context.staker.connect(incentiveCreator).createIncentive(
+        return await context.staker.connect(incentiveCreator).createIncentive(
           {
             rewardToken: params.rewardToken || context.rewardToken.address,
             pool: context.pool01,
@@ -59,17 +59,17 @@ describe('unit/Incentives', async () => {
             refundee: params.refundee || incentiveCreator.address,
           },
           totalReward
-        )).wait()
+        )
       }
     })
 
     describe('works and', () => {
       it('transfers the right amount of rewardToken', async () => {
         const balanceBefore = await context.rewardToken.balanceOf(context.staker.address)
-        await subject({
+        await(await subject({
           reward: totalReward,
           rewardToken: context.rewardToken.address,
-        })
+        })).wait()
         expect(await context.rewardToken.balanceOf(context.staker.address)).to.eq(balanceBefore.add(totalReward))
       })
 
@@ -89,7 +89,7 @@ describe('unit/Incentives', async () => {
 
       it('creates an incentive with the correct parameters', async () => {
         timestamps = makeTimestamps(await blockTimestamp())
-        await subject(timestamps)
+        await(await subject(timestamps)).wait()
         const incentiveId = await context.testIncentiveId.compute({
           rewardToken: context.rewardToken.address,
           pool: context.pool01,
@@ -106,7 +106,11 @@ describe('unit/Incentives', async () => {
       it('adds to existing incentives', async () => {
         const params = makeTimestamps(await blockTimestamp())
         expect(await subject(params)).to.emit(context.staker, 'IncentiveCreated')
+        // Wait for the first transaction.
+        await new Promise(resolve => setTimeout(resolve, 5000));
         await expect(subject(params)).to.not.be.reverted
+        // Wait for the second transaction.
+        await new Promise(resolve => setTimeout(resolve, 5000));
         const incentiveId = await context.testIncentiveId.compute({
           rewardToken: context.rewardToken.address,
           pool: context.pool01,
@@ -265,13 +269,13 @@ describe('unit/Incentives', async () => {
       })
 
       subject = async (params: Partial<ContractParams.EndIncentive> = {}) => {
-        return await(await context.staker.connect(incentiveCreator).endIncentive({
+        return await context.staker.connect(incentiveCreator).endIncentive({
           rewardToken: params.rewardToken || context.rewardToken.address,
           pool: context.pool01,
           startTime: params.startTime || timestamps.startTime,
           endTime: params.endTime || timestamps.endTime,
           refundee: incentiveCreator.address,
-        })).wait()
+        })
       }
     })
 
@@ -291,7 +295,7 @@ describe('unit/Incentives', async () => {
         expect((await context.staker.incentives(incentiveId)).totalRewardUnclaimed).to.be.gt(0)
 
         await Time.set(timestamps.endTime + 1)
-        await subject({})
+        await(await subject({})).wait()
         const { totalRewardUnclaimed, totalSecondsClaimedX128, numberOfStakes } = await context.staker.incentives(
           incentiveId
         )

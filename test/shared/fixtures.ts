@@ -1,7 +1,6 @@
 import { constants } from 'ethers'
 
 import UniswapV3Pool from '@uniswap/v3-core/artifacts-zk/contracts/UniswapV3Pool.sol/UniswapV3Pool.json'
-import NFTDescriptorJson from '@uniswap/v3-periphery/artifacts-zk/contracts/libraries/NFTDescriptor.sol/NFTDescriptor.json'
 import WETH9 from './external/WETH9.json'
 import { ISwapRouter } from '../../types/ISwapRouter'
 import { IWETH9 } from '../../types/IWETH9'
@@ -49,7 +48,7 @@ export const v3RouterFixture = async ([wallet]): Promise<{
 }
 
 const nftDescriptorLibraryFixture = async ([wallet]): Promise<NFTDescriptor> => {
-  return (await deployContractWithArtifact(wallet, NFTDescriptorJson as any)) as NFTDescriptor
+  return (await deployContract(wallet, 'NFTDescriptor')) as NFTDescriptor
 }
 
 type UniswapFactoryFixture = {
@@ -75,7 +74,7 @@ export const uniswapFactoryFixture = async (wallets): Promise<UniswapFactoryFixt
 
     const hre = require('hardhat')
     hre.config.zksolc.settings.libraries = {
-      '@uniswap/v3-periphery/contracts/libraries/NFTDescriptor.sol': {
+      'contracts/test/v3-periphery/libraries/NFTDescriptor.sol': {
         NFTDescriptor: nftDescriptorLibrary.address,
       },
     }
