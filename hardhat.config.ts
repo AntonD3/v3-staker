@@ -92,7 +92,7 @@ const config: any = {
     compilers: [DEFAULT_COMPILER_SETTINGS],
   },
   zksolc: {
-    version: "1.3.12",
+    version: "1.3.13",
     compilerSource: "binary",
     settings: {
       metadata: {

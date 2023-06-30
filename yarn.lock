@@ -1504,15 +1504,15 @@
 
 "@uniswap/v2-core@https://github.com/AntonD3/v2-core.git#v1.0.1-zksync-era":
   version "1.0.1"
-  resolved "https://github.com/AntonD3/v2-core.git#0ce72c31df25108e7301536085eca9f00460301e"
+  resolved "https://github.com/AntonD3/v2-core.git#bf8f5db636135f4fd11edc439d39acc60042c553"
 
 "@uniswap/v3-core@https://github.com/AntonD3/v3-core.git#v1.0.0-zksync-era":
   version "1.0.0"
-  resolved "https://github.com/AntonD3/v3-core.git#32a847aba1aa842012b11491a65cac86bef1b7a8"
+  resolved "https://github.com/AntonD3/v3-core.git#ad482a4cb91c86c97c63d99caa9c6267403e5d38"
 
 "@uniswap/v3-periphery@https://github.com/AntonD3/v3-periphery.git#v1.0.1-zksync-era":
   version "1.0.1"
-  resolved "https://github.com/AntonD3/v3-periphery.git#91785066548d5bcd854e927b5675a9920ca3b206"
+  resolved "https://github.com/AntonD3/v3-periphery.git#1371437511a2b2731e6bfd2a49bea816cb630860"
   dependencies:
     "@openzeppelin/contracts" "3.4.1-solc-0.7-2"
     "@uniswap/lib" "^4.0.1-alpha"
