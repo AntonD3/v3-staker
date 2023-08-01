@@ -1502,22 +1502,22 @@
   resolved "https://registry.yarnpkg.com/@uniswap/lib/-/lib-4.0.1-alpha.tgz#2881008e55f075344675b3bca93f020b028fbd02"
   integrity sha512-f6UIliwBbRsgVLxIaBANF6w09tYqc6Y/qXdsrbEmXHyFA7ILiKrIwRFXe1yOg8M3cksgVsO9N7yuL2DdCGQKBA==
 
-"@uniswap/v2-core@https://github.com/AntonD3/v2-core.git#v1.0.1-zksync-era":
+"@uniswap/v2-core@https://github.com/matter-labs/v2-core.git#v1.0.1-zksync-era":
   version "1.0.1"
-  resolved "https://github.com/AntonD3/v2-core.git#bf8f5db636135f4fd11edc439d39acc60042c553"
+  resolved "https://github.com/matter-labs/v2-core.git#2125dda4928d483b5263646109d17b22dde22384"
 
-"@uniswap/v3-core@https://github.com/AntonD3/v3-core.git#v1.0.0-zksync-era":
+"@uniswap/v3-core@https://github.com/matter-labs/v3-core.git#v1.0.0-zksync-era":
   version "1.0.0"
-  resolved "https://github.com/AntonD3/v3-core.git#ad482a4cb91c86c97c63d99caa9c6267403e5d38"
+  resolved "https://github.com/matter-labs/v3-core.git#841a1b0e8631b92b15728c1ad74865c338367745"
 
-"@uniswap/v3-periphery@https://github.com/AntonD3/v3-periphery.git#v1.0.1-zksync-era":
+"@uniswap/v3-periphery@https://github.com/matter-labs/v3-periphery.git#v1.0.1-zksync-era":
   version "1.0.1"
-  resolved "https://github.com/AntonD3/v3-periphery.git#1371437511a2b2731e6bfd2a49bea816cb630860"
+  resolved "https://github.com/matter-labs/v3-periphery.git#6e89fe6b09f9b38deb240870a4315ac1809d0f2f"
   dependencies:
     "@openzeppelin/contracts" "3.4.1-solc-0.7-2"
     "@uniswap/lib" "^4.0.1-alpha"
-    "@uniswap/v2-core" "https://github.com/AntonD3/v2-core.git#v1.0.1-zksync-era"
-    "@uniswap/v3-core" "https://github.com/AntonD3/v3-core.git#v1.0.0-zksync-era"
+    "@uniswap/v2-core" "https://github.com/matter-labs/v2-core.git#v1.0.1-zksync-era"
+    "@uniswap/v3-core" "https://github.com/matter-labs/v3-core.git#v1.0.0-zksync-era"
     base64-sol "1.0.1"
 
 "@yarnpkg/lockfile@^1.1.0":
