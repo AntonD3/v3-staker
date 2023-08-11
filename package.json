@@ -11,7 +11,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Uniswap/uniswap-v3-staker"
+    "url": "https://github.com/matter-labs/v3-staker"
   },
   "files": [
     "contracts",
@@ -72,8 +72,7 @@
     "prettier:check": "prettier-check contracts/**/*.sol test/**/*.ts types/*.ts",
     "size-contracts": "hardhat compile && hardhat size-contracts",
     "test": "hardhat test",
-    "clear-cache": "rm -rf artifacts/ cache/ typechain/",
-    "coverage": "RUN_COVERAGE=1 hardhat coverage",
-    "local-setup": "./scripts/start-local-setup.sh"
+    "clear-cache": "rm -rf artifacts-zk/ cache-zk/ typechain-zk/",
+    "coverage": "RUN_COVERAGE=1 hardhat coverage"
   }
 }

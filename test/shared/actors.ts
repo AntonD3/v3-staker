@@ -11,7 +11,7 @@ export const WALLET_USER_INDEXES = {
   TRADER_USER_0: 7,
   TRADER_USER_1: 8,
   TRADER_USER_2: 9,
-  INCENTIVE_CREATOR: 9, // There are only 10 rich wallets in the zksync local-setup
+  INCENTIVE_CREATOR: 9,
 }
 
 export class ActorFixture {

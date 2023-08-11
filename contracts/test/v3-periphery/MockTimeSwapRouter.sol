@@ -8,7 +8,11 @@ import '../TimeSimulator.sol';
 contract MockTimeSwapRouter is SwapRouter {
     TimeSimulator immutable timeSimulator;
 
-    constructor(address _factory, address _WETH9, TimeSimulator _timeSimulator) SwapRouter(_factory, _WETH9) {
+    constructor(
+        address _factory,
+        address _WETH9,
+        TimeSimulator _timeSimulator
+    ) SwapRouter(_factory, _WETH9) {
         timeSimulator = _timeSimulator;
     }
 

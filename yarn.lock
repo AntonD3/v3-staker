@@ -1504,15 +1504,15 @@
 
 "@uniswap/v2-core@https://github.com/matter-labs/v2-core.git#v1.0.1-zksync-era":
   version "1.0.1"
-  resolved "https://github.com/matter-labs/v2-core.git#2125dda4928d483b5263646109d17b22dde22384"
+  resolved "https://github.com/matter-labs/v2-core.git#8d4de891341d2a234f598403c6e3b0cc69af58ea"
 
 "@uniswap/v3-core@https://github.com/matter-labs/v3-core.git#v1.0.0-zksync-era":
   version "1.0.0"
-  resolved "https://github.com/matter-labs/v3-core.git#841a1b0e8631b92b15728c1ad74865c338367745"
+  resolved "https://github.com/matter-labs/v3-core.git#04edd15144fdb9a54c44fd2c7efb5735e26f9106"
 
 "@uniswap/v3-periphery@https://github.com/matter-labs/v3-periphery.git#v1.0.1-zksync-era":
   version "1.0.1"
-  resolved "https://github.com/matter-labs/v3-periphery.git#6e89fe6b09f9b38deb240870a4315ac1809d0f2f"
+  resolved "https://github.com/matter-labs/v3-periphery.git#12e0a85045600dac4def059b00c8b5fb4ba0eb60"
   dependencies:
     "@openzeppelin/contracts" "3.4.1-solc-0.7-2"
     "@uniswap/lib" "^4.0.1-alpha"

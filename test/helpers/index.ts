@@ -105,20 +105,22 @@ export class HelperCommands {
     const bal = await params.rewardToken.balanceOf(incentiveCreator.address)
 
     if (bal < params.totalReward) {
-      await(await params.rewardToken.transfer(incentiveCreator.address, params.totalReward)).wait()
+      await (await params.rewardToken.transfer(incentiveCreator.address, params.totalReward)).wait()
     }
 
-    await(await params.rewardToken.connect(incentiveCreator).approve(this.staker.address, params.totalReward)).wait()
+    await (await params.rewardToken.connect(incentiveCreator).approve(this.staker.address, params.totalReward)).wait()
 
-    await(await this.staker.connect(incentiveCreator).createIncentive(
-      {
-        pool: params.poolAddress,
-        rewardToken: params.rewardToken.address,
-        ...times,
-        refundee: params.refundee || incentiveCreator.address,
-      },
-      params.totalReward
-    )).wait()
+    await (
+      await this.staker.connect(incentiveCreator).createIncentive(
+        {
+          pool: params.poolAddress,
+          rewardToken: params.rewardToken.address,
+          ...times,
+          refundee: params.refundee || incentiveCreator.address,
+        },
+        params.totalReward
+      )
+    ).wait()
 
     return {
       ..._.pick(params, ['poolAddress', 'totalReward', 'rewardToken']),
@@ -138,19 +140,23 @@ export class HelperCommands {
     // Make sure LP has enough balance
     const bal0 = await params.tokensToStake[0].balanceOf(params.lp.address)
     if (bal0 < params.amountsToStake[0])
-      await(await params.tokensToStake[0]
-        // .connect(tokensOwner)
-        .transfer(params.lp.address, params.amountsToStake[0])).wait()
+      await (
+        await params.tokensToStake[0]
+          // .connect(tokensOwner)
+          .transfer(params.lp.address, params.amountsToStake[0])
+      ).wait()
 
     const bal1 = await params.tokensToStake[1].balanceOf(params.lp.address)
     if (bal1 < params.amountsToStake[1])
-      await(await params.tokensToStake[1]
-        // .connect(tokensOwner)
-        .transfer(params.lp.address, params.amountsToStake[1])).wait()
+      await (
+        await params.tokensToStake[1]
+          // .connect(tokensOwner)
+          .transfer(params.lp.address, params.amountsToStake[1])
+      ).wait()
 
     // Make sure LP has authorized NFT to withdraw
-    await(await params.tokensToStake[0].connect(params.lp).approve(this.nft.address, params.amountsToStake[0])).wait()
-    await(await params.tokensToStake[1].connect(params.lp).approve(this.nft.address, params.amountsToStake[1])).wait()
+    await (await params.tokensToStake[0].connect(params.lp).approve(this.nft.address, params.amountsToStake[0])).wait()
+    await (await params.tokensToStake[1].connect(params.lp).approve(this.nft.address, params.amountsToStake[1])).wait()
 
     // The LP mints their NFT
     const tokenId = await mintPosition(this.nft.connect(params.lp), {
@@ -168,17 +174,25 @@ export class HelperCommands {
     })
 
     // Make sure LP has authorized staker
-    await(await params.tokensToStake[0].connect(params.lp).approve(this.staker.address, params.amountsToStake[0])).wait()
-    await(await params.tokensToStake[1].connect(params.lp).approve(this.staker.address, params.amountsToStake[1])).wait()
+    await (
+      await params.tokensToStake[0].connect(params.lp).approve(this.staker.address, params.amountsToStake[0])
+    ).wait()
+    await (
+      await params.tokensToStake[1].connect(params.lp).approve(this.staker.address, params.amountsToStake[1])
+    ).wait()
 
     // The LP approves and stakes their NFT
-    await(await this.nft.connect(params.lp).approve(this.staker.address, tokenId)).wait()
-    await(await this.nft
-      .connect(params.lp)
-      ['safeTransferFrom(address,address,uint256)'](params.lp.address, this.staker.address, tokenId)).wait()
-    await(await this.staker
-      .connect(params.lp)
-      .stakeToken(incentiveResultToStakeAdapter(params.createIncentiveResult), tokenId)).wait()
+    await (await this.nft.connect(params.lp).approve(this.staker.address, tokenId)).wait()
+    await (
+      await this.nft
+        .connect(params.lp)
+        ['safeTransferFrom(address,address,uint256)'](params.lp.address, this.staker.address, tokenId)
+    ).wait()
+    await (
+      await this.staker
+        .connect(params.lp)
+        .stakeToken(incentiveResultToStakeAdapter(params.createIncentiveResult), tokenId)
+    ).wait()
 
     const stakedAt = await blockTimestamp()
 
@@ -190,11 +204,13 @@ export class HelperCommands {
   }
 
   depositFlow: HelperTypes.Deposit.Command = async (params) => {
-    await(await this.nft.connect(params.lp).approve(this.staker.address, params.tokenId)).wait()
+    await (await this.nft.connect(params.lp).approve(this.staker.address, params.tokenId)).wait()
 
-    await(await this.nft
-      .connect(params.lp)
-      ['safeTransferFrom(address,address,uint256)'](params.lp.address, this.staker.address, params.tokenId)).wait()
+    await (
+      await this.nft
+        .connect(params.lp)
+        ['safeTransferFrom(address,address,uint256)'](params.lp.address, this.staker.address, params.tokenId)
+    ).wait()
   }
 
   mintFlow: HelperTypes.Mint.Command = async (params) => {
@@ -227,47 +243,55 @@ export class HelperCommands {
   }
 
   unstakeCollectBurnFlow: HelperTypes.UnstakeCollectBurn.Command = async (params) => {
-    await(await this.staker.connect(params.lp).unstakeToken(
-      incentiveResultToStakeAdapter(params.createIncentiveResult),
-      params.tokenId,
+    await (
+      await this.staker.connect(params.lp).unstakeToken(
+        incentiveResultToStakeAdapter(params.createIncentiveResult),
+        params.tokenId,
 
-      maxGas
-    )).wait()
+        maxGas
+      )
+    ).wait()
 
     const unstakedAt = await blockTimestamp()
 
-    await(await this.staker
-      .connect(params.lp)
-      .claimReward(params.createIncentiveResult.rewardToken.address, params.lp.address, BN('0'))).wait()
+    await (
+      await this.staker
+        .connect(params.lp)
+        .claimReward(params.createIncentiveResult.rewardToken.address, params.lp.address, BN('0'))
+    ).wait()
 
-    await(await this.staker.connect(params.lp).withdrawToken(params.tokenId, params.lp.address, '0x', maxGas)).wait()
+    await (await this.staker.connect(params.lp).withdrawToken(params.tokenId, params.lp.address, '0x', maxGas)).wait()
 
     const { liquidity } = await this.nft.connect(params.lp).positions(params.tokenId)
 
-    await(await this.nft.connect(params.lp).decreaseLiquidity(
-      {
-        tokenId: params.tokenId,
-        liquidity,
-        amount0Min: 0,
-        amount1Min: 0,
-        deadline: (await blockTimestamp()) + 1000,
-      },
-      maxGas
-    )).wait()
+    await (
+      await this.nft.connect(params.lp).decreaseLiquidity(
+        {
+          tokenId: params.tokenId,
+          liquidity,
+          amount0Min: 0,
+          amount1Min: 0,
+          deadline: (await blockTimestamp()) + 1000,
+        },
+        maxGas
+      )
+    ).wait()
 
     const { tokensOwed0, tokensOwed1 } = await this.nft.connect(params.lp).positions(params.tokenId)
 
-    await(await this.nft.connect(params.lp).collect(
-      {
-        tokenId: params.tokenId,
-        recipient: params.lp.address,
-        amount0Max: tokensOwed0,
-        amount1Max: tokensOwed1,
-      },
-      maxGas
-    )).wait()
+    await (
+      await this.nft.connect(params.lp).collect(
+        {
+          tokenId: params.tokenId,
+          recipient: params.lp.address,
+          amount0Max: tokensOwed0,
+          amount1Max: tokensOwed1,
+        },
+        maxGas
+      )
+    ).wait()
 
-    await(await this.nft.connect(params.lp).burn(params.tokenId, maxGas)).wait()
+    await (await this.nft.connect(params.lp).burn(params.tokenId, maxGas)).wait()
 
     const balance = await params.createIncentiveResult.rewardToken.connect(params.lp).balanceOf(params.lp.address)
 
@@ -291,14 +315,15 @@ export class HelperCommands {
       )
     ).wait()
 
-    const transferFilter = rewardToken.filters.Transfer(this.staker.address, incentiveCreator.address, null)
     const transferTopic = rewardToken.interface.getEventTopic('Transfer')
-    const logItem = receipt.logs.find((log) => log.topics.includes(transferTopic))
-    const events = await rewardToken.queryFilter(transferFilter, logItem?.blockNumber, logItem?.blockNumber)
+    const logItem = receipt.logs.find(
+      (log) => log.topics.includes(transferTopic) && log.address !== '0x000000000000000000000000000000000000800A'
+    )!
+    const event = rewardToken.interface.parseLog(logItem)
     let amountTransferred: BigNumber
 
-    if (events.length === 1) {
-      amountTransferred = events[0].args[2]
+    if (event.args.from === this.staker.address && event.args.to === incentiveCreator.address) {
+      amountTransferred = event.args[2]
     } else {
       throw new Error('Could not find transfer event')
     }
@@ -361,16 +386,18 @@ export class HelperCommands {
         FeeAmount.MEDIUM,
       ])
 
-      await(await this.router.connect(actor).exactInput(
-        {
-          recipient: actor.address,
-          deadline: MaxUint256,
-          path,
-          amountIn: amountIn.div(10),
-          amountOutMinimum: 0,
-        },
-        maxGas
-      )).wait()
+      await (
+        await this.router.connect(actor).exactInput(
+          {
+            recipient: actor.address,
+            deadline: MaxUint256,
+            path,
+            amountIn: amountIn.div(10),
+            amountOutMinimum: 0,
+          },
+          maxGas
+        )
+      ).wait()
 
       return await getCurrentTick(this.pool.connect(actor))
     }
@@ -403,9 +430,11 @@ export class ERC20Helper {
   ensureBalance = async (actor: Wallet, token: TestERC20, balance: BigNumber) => {
     const currentBalance = await token.balanceOf(actor.address)
     if (currentBalance.lt(balance)) {
-      await(await token
-        // .connect(this.actors.tokensOwner())
-        .transfer(actor.address, balance.sub(currentBalance))).wait()
+      await (
+        await token
+          // .connect(this.actors.tokensOwner())
+          .transfer(actor.address, balance.sub(currentBalance))
+      ).wait()
     }
 
     // if (spender) {
@@ -418,7 +447,7 @@ export class ERC20Helper {
   ensureApproval = async (actor: Wallet, token: TestERC20, balance: BigNumber, spender: string) => {
     const currentAllowance = await token.allowance(actor.address, actor.address)
     if (currentAllowance.lt(balance)) {
-      await(await token.connect(actor).approve(spender, balance)).wait()
+      await (await token.connect(actor).approve(spender, balance)).wait()
     }
   }
 }

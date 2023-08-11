@@ -71,7 +71,7 @@ describe('unit/Multicall', () => {
       },
       totalReward,
     ])
-    await(await context.staker.connect(multicaller).multicall([createIncentiveTx], maxGas)).wait()
+    await (await context.staker.connect(multicaller).multicall([createIncentiveTx], maxGas)).wait()
 
     // expect((await context.staker.deposits(tokenId)).owner).to.eq(
     //   multicaller.address
@@ -150,7 +150,7 @@ describe('unit/Multicall', () => {
       ticks: [getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]), getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM])],
       createIncentiveResult: incentive0,
     })
-    await(await context.staker.connect(lpUser0).stakeToken(incentiveResultToStakeAdapter(incentive1), tokenId)).wait()
+    await (await context.staker.connect(lpUser0).stakeToken(incentiveResultToStakeAdapter(incentive1), tokenId)).wait()
 
     await Time.set(endTime)
 
@@ -199,7 +199,9 @@ describe('unit/Multicall', () => {
     const unstake = (tokenId) =>
       context.staker.interface.encodeFunctionData('unstakeToken', [incentiveResultToStakeAdapter(incentive), tokenId])
 
-    await(await context.staker.connect(multicaller).multicall([unstake(tokenId0), unstake(tokenId1), unstake(tokenId2)])).wait()
+    await (
+      await context.staker.connect(multicaller).multicall([unstake(tokenId0), unstake(tokenId1), unstake(tokenId2)])
+    ).wait()
 
     const { numberOfStakes: n0 } = await context.staker.deposits(tokenId0)
     expect(n0).to.eq(BN('0'))

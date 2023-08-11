@@ -66,10 +66,12 @@ describe('unit/Incentives', async () => {
     describe('works and', () => {
       it('transfers the right amount of rewardToken', async () => {
         const balanceBefore = await context.rewardToken.balanceOf(context.staker.address)
-        await(await subject({
-          reward: totalReward,
-          rewardToken: context.rewardToken.address,
-        })).wait()
+        await (
+          await subject({
+            reward: totalReward,
+            rewardToken: context.rewardToken.address,
+          })
+        ).wait()
         expect(await context.rewardToken.balanceOf(context.staker.address)).to.eq(balanceBefore.add(totalReward))
       })
 
@@ -89,7 +91,7 @@ describe('unit/Incentives', async () => {
 
       it('creates an incentive with the correct parameters', async () => {
         timestamps = makeTimestamps(await blockTimestamp())
-        await(await subject(timestamps)).wait()
+        await (await subject(timestamps)).wait()
         const incentiveId = await context.testIncentiveId.compute({
           rewardToken: context.rewardToken.address,
           pool: context.pool01,
@@ -107,10 +109,10 @@ describe('unit/Incentives', async () => {
         const params = makeTimestamps(await blockTimestamp())
         expect(await subject(params)).to.emit(context.staker, 'IncentiveCreated')
         // Wait for the first transaction.
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 5000))
         await expect(subject(params)).to.not.be.reverted
         // Wait for the second transaction.
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 5000))
         const incentiveId = await context.testIncentiveId.compute({
           rewardToken: context.rewardToken.address,
           pool: context.pool01,
@@ -136,7 +138,7 @@ describe('unit/Incentives', async () => {
           pool: context.pool01,
         }
         await erc20Helper.ensureBalancesAndApprovals(actors.lpUser0(), rewardToken, BN(100), context.staker.address)
-        await(await context.staker.connect(actors.lpUser0()).createIncentive(incentiveKey, 100)).wait()
+        await (await context.staker.connect(actors.lpUser0()).createIncentive(incentiveKey, 100)).wait()
         const incentiveId = await context.testIncentiveId.compute(incentiveKey)
         let { totalRewardUnclaimed, totalSecondsClaimedX128, numberOfStakes } = await context.staker.incentives(
           incentiveId
@@ -157,12 +159,14 @@ describe('unit/Incentives', async () => {
         await erc20Helper.ensureBalancesAndApprovals(actors.lpUser0(), rewardToken, BN(50), context.staker.address)
 
         await Time.set(testTimestamps.startTime)
-        await(await context.staker
-          .connect(actors.lpUser0())
-          .multicall([
-            context.staker.interface.encodeFunctionData('createIncentive', [incentiveKey, 50]),
-            context.staker.interface.encodeFunctionData('stakeToken', [incentiveKey, tokenId]),
-          ])).wait()
+        await (
+          await context.staker
+            .connect(actors.lpUser0())
+            .multicall([
+              context.staker.interface.encodeFunctionData('createIncentive', [incentiveKey, 50]),
+              context.staker.interface.encodeFunctionData('stakeToken', [incentiveKey, tokenId]),
+            ])
+        ).wait()
         ;({ totalRewardUnclaimed, totalSecondsClaimedX128, numberOfStakes } = await context.staker
           .connect(actors.lpUser0())
           .incentives(incentiveId))
@@ -295,7 +299,7 @@ describe('unit/Incentives', async () => {
         expect((await context.staker.incentives(incentiveId)).totalRewardUnclaimed).to.be.gt(0)
 
         await Time.set(timestamps.endTime + 1)
-        await(await subject({})).wait()
+        await (await subject({})).wait()
         const { totalRewardUnclaimed, totalSecondsClaimedX128, numberOfStakes } = await context.staker.incentives(
           incentiveId
         )

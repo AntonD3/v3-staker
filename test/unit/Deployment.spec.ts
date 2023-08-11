@@ -16,7 +16,7 @@ describe('unit/Deployment', () => {
       context.factory.address,
       context.nft.address,
       2 ** 32,
-      2 ** 32
+      2 ** 32,
     ])) as UniswapV3Staker
     expect(staker.address).to.be.a.string
   })
@@ -26,7 +26,7 @@ describe('unit/Deployment', () => {
       context.factory.address,
       context.nft.address,
       2 ** 32,
-      2 ** 32
+      2 ** 32,
     ])) as UniswapV3Staker
 
     expect(await staker.factory()).to.equal(context.factory.address)

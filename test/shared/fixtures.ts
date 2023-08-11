@@ -10,14 +10,13 @@ import {
   INonfungiblePositionManager,
   IUniswapV3Factory,
   IUniswapV3Pool,
-  TestIncentiveId
+  TestIncentiveId,
 } from '../../typechain'
 import { NFTDescriptor } from '../../types/NFTDescriptor'
 import { FeeAmount, BigNumber, encodePriceSqrt, MAX_GAS_LIMIT } from '../shared'
 import { ActorFixture } from './actors'
 import { deployContract, deployContractWithArtifact, getTimeSimulator } from './zkSyncUtils'
 import { Contract } from 'zksync-web3'
-import hre from "hardhat";
 
 type WETH9Fixture = { weth9: IWETH9 }
 
@@ -28,7 +27,9 @@ export const wethFixture = async ([wallet]): Promise<WETH9Fixture> => {
 }
 
 const v3CoreFactoryFixture = async ([wallet]): Promise<IUniswapV3Factory> => {
-  return (await deployContract(wallet, 'MockTimeUniswapV3Factory', [(await getTimeSimulator()).address])) as IUniswapV3Factory
+  return (await deployContract(wallet, 'MockTimeUniswapV3Factory', [
+    (await getTimeSimulator()).address,
+  ])) as IUniswapV3Factory
 }
 
 export const v3RouterFixture = async ([wallet]): Promise<{
@@ -41,7 +42,7 @@ export const v3RouterFixture = async ([wallet]): Promise<{
   const router = (await deployContract(wallet, 'MockTimeSwapRouter', [
     factory.address,
     weth9.address,
-    (await getTimeSimulator()).address
+    (await getTimeSimulator()).address,
   ])) as ISwapRouter
 
   return { factory, weth9, router }
@@ -83,13 +84,11 @@ export const uniswapFactoryFixture = async (wallets): Promise<UniswapFactoryFixt
 
   const positionDescriptor = await deployContract(wallets[0], 'NonfungibleTokenPositionDescriptor', [tokens[0].address])
 
-  const nft = (await deployContract(
-    wallets[0],
-    'MockTimeNonfungiblePositionManager', [
+  const nft = (await deployContract(wallets[0], 'MockTimeNonfungiblePositionManager', [
     factory.address,
     weth9.address,
     positionDescriptor.address,
-    (await getTimeSimulator()).address
+    (await getTimeSimulator()).address,
   ])) as INonfungiblePositionManager
 
   tokens.sort((a, b) => (a.address.toLowerCase() < b.address.toLowerCase() ? -1 : 1))
@@ -119,7 +118,6 @@ export const mintPosition = async (
     deadline: number
   }
 ): Promise<string> => {
-  const transferFilter = nft.filters.Transfer(null, null, null)
   const transferTopic = nft.interface.getEventTopic('Transfer')
 
   let tokenId: BigNumber | undefined
@@ -148,12 +146,7 @@ export const mintPosition = async (
   for (let i = 0; i < receipt.logs.length; i++) {
     const log = receipt.logs[i]
     if (log.address === nft.address && log.topics.includes(transferTopic)) {
-      // for some reason log.data is 0x so this hack just re-fetches it
-      const events = await nft.queryFilter(transferFilter, log.blockNumber, log.blockNumber)
-      if (events.length === 1) {
-        tokenId = events[0].args?.tokenId
-      }
-      break
+      tokenId = nft.interface.parseLog(log).args.tokenId
     }
   }
 
@@ -184,20 +177,26 @@ export const uniswapFixture = async (wallets, provider): Promise<UniswapFixtureT
   const signer = new ActorFixture(wallets, provider).stakerDeployer()
   const staker = (await deployContract(signer, 'MockTimeUniswapV3Staker', [
     factory.address,
-    nft.address, 2 ** 32, 2 ** 32,
-    (await getTimeSimulator()).address
+    nft.address,
+    2 ** 32,
+    2 ** 32,
+    (await getTimeSimulator()).address,
   ])) as MockTimeUniswapV3Staker
 
   const testIncentiveId = (await deployContract(signer, 'TestIncentiveId')) as TestIncentiveId
 
   for (const token of tokens) {
-    await(await token.approve(nft.address, constants.MaxUint256)).wait()
+    await (await token.approve(nft.address, constants.MaxUint256)).wait()
   }
 
   const fee = FeeAmount.MEDIUM
-  await(await nft.createAndInitializePoolIfNecessary(tokens[0].address, tokens[1].address, fee, encodePriceSqrt(1, 1))).wait()
+  await (
+    await nft.createAndInitializePoolIfNecessary(tokens[0].address, tokens[1].address, fee, encodePriceSqrt(1, 1))
+  ).wait()
 
-  await(await nft.createAndInitializePoolIfNecessary(tokens[1].address, tokens[2].address, fee, encodePriceSqrt(1, 1))).wait()
+  await (
+    await nft.createAndInitializePoolIfNecessary(tokens[1].address, tokens[2].address, fee, encodePriceSqrt(1, 1))
+  ).wait()
 
   const pool01 = await factory.getPool(tokens[0].address, tokens[1].address, fee)
 

@@ -13,12 +13,12 @@ export const createTimeMachine = (): TimeSetters => {
     set: async (timestamp: number) => {
       log.debug(`🕒 setTime(${timestamp})`)
       // Not sure if I need both of those
-      await(await (await getTimeSimulator()).setTimestamp(timestamp)).wait()
+      await (await (await getTimeSimulator()).setTimestamp(timestamp)).wait()
     },
 
     step: async (interval: number) => {
       log.debug(`🕒 increaseTime(${interval})`)
-      await(await (await getTimeSimulator()).increaseTime(interval)).wait()
+      await (await (await getTimeSimulator()).increaseTime(interval)).wait()
     },
   }
 }

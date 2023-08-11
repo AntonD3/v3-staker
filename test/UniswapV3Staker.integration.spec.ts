@@ -83,7 +83,7 @@ describe('integration', async () => {
       await Time.set(startTime + 1)
 
       let stakes: HelperTypes.MintDepositStake.Result[] = []
-      for(const lp of actors.lpUsers()) {
+      for (const lp of actors.lpUsers()) {
         stakes.push(
           await helpers.mintDepositStakeFlow({
             ...params,
@@ -116,13 +116,15 @@ describe('integration', async () => {
         )
 
         // Everyone pulls their liquidity at the same time
-        let unstakes: HelperTypes.UnstakeCollectBurn.Result[]  = []
+        let unstakes: HelperTypes.UnstakeCollectBurn.Result[] = []
         for (let { lp, tokenId } of subject.stakes) {
-          unstakes.push(await helpers.unstakeCollectBurnFlow({
-            lp,
-            tokenId,
-            createIncentiveResult,
-          }))
+          unstakes.push(
+            await helpers.unstakeCollectBurnFlow({
+              lp,
+              tokenId,
+              createIncentiveResult,
+            })
+          )
         }
         const rewardsEarned = bnSum(unstakes.map((o) => o.balance))
         log.debug('Total rewards ', rewardsEarned.toString())
@@ -171,7 +173,7 @@ describe('integration', async () => {
             .withArgs(stakes[0].tokenId, incentiveId)
 
           // It does not allow them to claim rewards (since we're past end time)
-          await(await actions.doClaimRewards(stakes[0])).wait()
+          await (await actions.doClaimRewards(stakes[0])).wait()
 
           // Owner is still the staker
           expect(await nft.ownerOf(stakes[0].tokenId)).to.eq(staker.address)
@@ -222,13 +224,15 @@ describe('integration', async () => {
         // Now the other two LPs hold off till the end and unstake
         await Time.set(endTime + 1)
 
-        let otherUnstakes: HelperTypes.UnstakeCollectBurn.Result[]  = []
+        let otherUnstakes: HelperTypes.UnstakeCollectBurn.Result[] = []
         for (let { lp, tokenId } of stakes.slice(1)) {
-          otherUnstakes.push(await helpers.unstakeCollectBurnFlow({
-            lp,
-            tokenId,
-            createIncentiveResult,
-          }))
+          otherUnstakes.push(
+            await helpers.unstakeCollectBurnFlow({
+              lp,
+              tokenId,
+              createIncentiveResult,
+            })
+          )
         }
         unstakes.push(...otherUnstakes)
 
@@ -329,13 +333,15 @@ describe('integration', async () => {
           // Now, go to the end and get rewards
           await Time.set(endTime + 1)
 
-          let unstakes: HelperTypes.UnstakeCollectBurn.Result[]  = []
+          let unstakes: HelperTypes.UnstakeCollectBurn.Result[] = []
           for (let { lp, tokenId } of stakes.concat(extraStake)) {
-            unstakes.push(await helpers.unstakeCollectBurnFlow({
-              lp,
-              tokenId,
-              createIncentiveResult,
-            }))
+            unstakes.push(
+              await helpers.unstakeCollectBurnFlow({
+                lp,
+                tokenId,
+                createIncentiveResult,
+              })
+            )
           }
 
           expect(ratioE18(unstakes[2].balance, unstakes[3].balance)).to.eq('4.34')
@@ -385,13 +391,15 @@ describe('integration', async () => {
 
         await Time.set(createIncentiveResult.endTime + 1)
 
-        let unstakes: HelperTypes.UnstakeCollectBurn.Result[]  = []
+        let unstakes: HelperTypes.UnstakeCollectBurn.Result[] = []
         for (let { lp, tokenId } of stakes) {
-          unstakes.push(await helpers.unstakeCollectBurnFlow({
-            lp,
-            tokenId,
-            createIncentiveResult,
-          }))
+          unstakes.push(
+            await helpers.unstakeCollectBurnFlow({
+              lp,
+              tokenId,
+              createIncentiveResult,
+            })
+          )
         }
 
         /**
@@ -502,7 +510,7 @@ describe('integration', async () => {
 
       await Time.set(createIncentiveResult.startTime + 1)
       let stakes: HelperTypes.MintDepositStake.Result[] = []
-      for(const p of positions) {
+      for (const p of positions) {
         stakes.push(
           await helpers.mintDepositStakeFlow({
             lp: p.lp,
@@ -540,7 +548,8 @@ describe('integration', async () => {
         createIncentiveResult,
       })
 
-      expect(lp0Balance).to.eq(BN('1499999131944544913825'))
+      // The values were updated due to time simulation and iterative minting
+      expect(lp0Balance).to.eq(BN('1500000173611091017234')) // 3*10^21 * (8640000/2+1) /(8640000+1)
 
       /* lp{1,2} provided liquidity for the first half of the duration.
       lp2 provided twice as much liquidity as lp1. */
@@ -556,8 +565,8 @@ describe('integration', async () => {
         createIncentiveResult,
       })
 
-      expect(lp1Balance).to.eq(BN('499996238431987566881'))
-      expect(lp2Balance).to.eq(BN('999990162082783775671'))
+      expect(lp1Balance).to.eq(BN('499999826388908982765'))
+      expect(lp2Balance).to.eq(BN('999999652777817965531'))
 
       await expect(
         helpers.unstakeCollectBurnFlow({
