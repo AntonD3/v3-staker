@@ -116,15 +116,14 @@ describe('integration', async () => {
         )
 
         // Everyone pulls their liquidity at the same time
-        const unstakes = await Promise.all(
-          subject.stakes.map(({ lp, tokenId }) =>
-            helpers.unstakeCollectBurnFlow({
-              lp,
-              tokenId,
-              createIncentiveResult,
-            })
-          )
-        )
+        let unstakes: HelperTypes.UnstakeCollectBurn.Result[]  = []
+        for (let { lp, tokenId } of subject.stakes) {
+          unstakes.push(await helpers.unstakeCollectBurnFlow({
+            lp,
+            tokenId,
+            createIncentiveResult,
+          }))
+        }
         const rewardsEarned = bnSum(unstakes.map((o) => o.balance))
         log.debug('Total rewards ', rewardsEarned.toString())
 
@@ -222,15 +221,15 @@ describe('integration', async () => {
 
         // Now the other two LPs hold off till the end and unstake
         await Time.set(endTime + 1)
-        const otherUnstakes = await Promise.all(
-          stakes.slice(1).map(({ lp, tokenId }) =>
-            helpers.unstakeCollectBurnFlow({
-              lp,
-              tokenId,
-              createIncentiveResult,
-            })
-          )
-        )
+
+        let otherUnstakes: HelperTypes.UnstakeCollectBurn.Result[]  = []
+        for (let { lp, tokenId } of stakes.slice(1)) {
+          otherUnstakes.push(await helpers.unstakeCollectBurnFlow({
+            lp,
+            tokenId,
+            createIncentiveResult,
+          }))
+        }
         unstakes.push(...otherUnstakes)
 
         // We don't need this call anymore because we're already setting that time above
@@ -330,15 +329,14 @@ describe('integration', async () => {
           // Now, go to the end and get rewards
           await Time.set(endTime + 1)
 
-          const unstakes = await Promise.all(
-            stakes.concat(extraStake).map(({ lp, tokenId }) =>
-              helpers.unstakeCollectBurnFlow({
-                lp,
-                tokenId,
-                createIncentiveResult,
-              })
-            )
-          )
+          let unstakes: HelperTypes.UnstakeCollectBurn.Result[]  = []
+          for (let { lp, tokenId } of stakes.concat(extraStake)) {
+            unstakes.push(await helpers.unstakeCollectBurnFlow({
+              lp,
+              tokenId,
+              createIncentiveResult,
+            }))
+          }
 
           expect(ratioE18(unstakes[2].balance, unstakes[3].balance)).to.eq('4.34')
 
@@ -387,15 +385,14 @@ describe('integration', async () => {
 
         await Time.set(createIncentiveResult.endTime + 1)
 
-        const unstakes = await Promise.all(
-          stakes.map(({ lp, tokenId }) =>
-            helpers.unstakeCollectBurnFlow({
-              lp,
-              tokenId,
-              createIncentiveResult,
-            })
-          )
-        )
+        let unstakes: HelperTypes.UnstakeCollectBurn.Result[]  = []
+        for (let { lp, tokenId } of stakes) {
+          unstakes.push(await helpers.unstakeCollectBurnFlow({
+            lp,
+            tokenId,
+            createIncentiveResult,
+          }))
+        }
 
         /**
          * The reward distributed to LPs should be:
