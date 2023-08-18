@@ -962,10 +962,10 @@
     chalk "4.1.2"
     dockerode "^3.3.4"
 
-"@matterlabs/hardhat-zksync-solc@^0.3.16":
-  version "0.3.16"
-  resolved "https://registry.yarnpkg.com/@matterlabs/hardhat-zksync-solc/-/hardhat-zksync-solc-0.3.16.tgz#dd8ed44f1a580f282794a15fee995f418b040158"
-  integrity sha512-gw46yyiCfj49I/nbUcOlnF5xE80WyeW/i8i9ouHom4KWJNt1kioQIwOPkN7aJURhXpJJxKSdeWBrQHLWTZDnTA==
+"@matterlabs/hardhat-zksync-solc@^0.3.17":
+  version "0.3.17"
+  resolved "https://registry.yarnpkg.com/@matterlabs/hardhat-zksync-solc/-/hardhat-zksync-solc-0.3.17.tgz#72f199544dc89b268d7bfc06d022a311042752fd"
+  integrity sha512-aZgQ0yfXW5xPkfuEH1d44ncWV4T2LzKZd0VVPo4PL5cUrYs2/II1FaEDp5zsf3FxOR1xT3mBsjuSrtJkk4AL8Q==
   dependencies:
     "@nomiclabs/hardhat-docker" "^2.0.0"
     chalk "4.1.2"
@@ -1502,22 +1502,22 @@
   resolved "https://registry.yarnpkg.com/@uniswap/lib/-/lib-4.0.1-alpha.tgz#2881008e55f075344675b3bca93f020b028fbd02"
   integrity sha512-f6UIliwBbRsgVLxIaBANF6w09tYqc6Y/qXdsrbEmXHyFA7ILiKrIwRFXe1yOg8M3cksgVsO9N7yuL2DdCGQKBA==
 
-"@uniswap/v2-core@https://github.com/matter-labs/v2-core.git#v1.0.1-zksync-era":
+"@uniswap/v2-core@https://github.com/uniswap-zksync/era-uniswap-v2-core.git#v1.0.1-zksync-era":
   version "1.0.1"
-  resolved "https://github.com/matter-labs/v2-core.git#8d4de891341d2a234f598403c6e3b0cc69af58ea"
+  resolved "https://github.com/uniswap-zksync/era-uniswap-v2-core.git#0ae8c6ae315c1efa77c2831da15553ef9fda4a5f"
 
-"@uniswap/v3-core@https://github.com/matter-labs/v3-core.git#v1.0.0-zksync-era":
+"@uniswap/v3-core@https://github.com/uniswap-zksync/era-uniswap-v3-core.git#v1.0.0-zksync-era":
   version "1.0.0"
-  resolved "https://github.com/matter-labs/v3-core.git#04edd15144fdb9a54c44fd2c7efb5735e26f9106"
+  resolved "https://github.com/uniswap-zksync/era-uniswap-v3-core.git#bba8fa7fc6f24810dea7384a4d8ca4e550e6f386"
 
-"@uniswap/v3-periphery@https://github.com/matter-labs/v3-periphery.git#v1.0.1-zksync-era":
+"@uniswap/v3-periphery@https://github.com/uniswap-zksync/era-uniswap-v3-periphery.git#v1.0.1-zksync-era":
   version "1.0.1"
-  resolved "https://github.com/matter-labs/v3-periphery.git#12e0a85045600dac4def059b00c8b5fb4ba0eb60"
+  resolved "https://github.com/uniswap-zksync/era-uniswap-v3-periphery.git#a5cc08cd99ef4d0cad1123e6cb3d351486c94c3e"
   dependencies:
     "@openzeppelin/contracts" "3.4.1-solc-0.7-2"
     "@uniswap/lib" "^4.0.1-alpha"
-    "@uniswap/v2-core" "https://github.com/matter-labs/v2-core.git#v1.0.1-zksync-era"
-    "@uniswap/v3-core" "https://github.com/matter-labs/v3-core.git#v1.0.0-zksync-era"
+    "@uniswap/v2-core" "https://github.com/uniswap-zksync/era-uniswap-v2-core.git#v1.0.1-zksync-era"
+    "@uniswap/v3-core" "https://github.com/uniswap-zksync/era-uniswap-v3-core.git#v1.0.0-zksync-era"
     base64-sol "1.0.1"
 
 "@yarnpkg/lockfile@^1.1.0":

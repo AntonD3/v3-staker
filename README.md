@@ -1,6 +1,6 @@
 # uniswap-v3-staker
 
-This is the canonical staking contract designed for [Uniswap V3](https://github.com/Uniswap/uniswap-v3-core).
+This is the canonical staking contract designed for [Uniswap V3](https://github.com/uniswap-zksync/era-uniswap-v3-core) forked for zkSync Era.
 
 ## Deployments
 
@@ -38,6 +38,7 @@ DEPRECATED: For historical verification, the staker at tag v1.0.0 is deployed an
 
 ```sh
 $ yarn
+$ yarn compile
 $ yarn test
 ```
 
