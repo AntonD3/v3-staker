@@ -3,12 +3,10 @@ import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import '@nomiclabs/hardhat-etherscan'
 import 'hardhat-contract-sizer'
-import 'solidity-coverage'
 import '@matterlabs/hardhat-zksync-deploy'
 import '@matterlabs/hardhat-zksync-solc'
 import '@matterlabs/hardhat-zksync-verify'
 
-import { SolcUserConfig } from 'hardhat/types'
 import { subtask } from 'hardhat/config'
 import * as path from 'path'
 import { TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS } from 'hardhat/builtin-tasks/task-names'
@@ -33,37 +31,9 @@ subtask(TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS, async (_, { config }, runSuper) 
   })
 })
 
-const DEFAULT_COMPILER_SETTINGS: SolcUserConfig = {
-  version: '0.7.6',
-  settings: {
-    optimizer: {
-      enabled: true,
-      runs: 1_000_000,
-    },
-    metadata: {
-      bytecodeHash: 'none',
-    },
-  },
-}
-
-if (process.env.RUN_COVERAGE == '1') {
-  /**
-   * Updates the default compiler settings when running coverage.
-   *
-   * See https://github.com/sc-forks/solidity-coverage/issues/417#issuecomment-730526466
-   */
-  console.info('Using coverage compiler settings')
-  DEFAULT_COMPILER_SETTINGS.settings.details = {
-    yul: true,
-    yulDetails: {
-      stackAllocation: true,
-    },
-  }
-}
-
 const config: any = {
   networks: {
-    zkSyncLocalhost: {
+    zkSyncTestNode: {
       url: 'http://localhost:8011',
       ethNetwork: '',
       zksync: true,
@@ -81,9 +51,9 @@ const config: any = {
       verifyURL: 'https://zksync2-mainnet-explorer.zksync.io/contract_verification',
     },
   },
-  defaultNetwork: 'zkSyncLocalhost',
+  defaultNetwork: 'zkSyncTestNode',
   solidity: {
-    compilers: [DEFAULT_COMPILER_SETTINGS],
+    version: '0.7.6',
   },
   zksolc: {
     version: '1.3.13',
@@ -102,14 +72,6 @@ const config: any = {
   mocha: {
     timeout: 100000000,
   },
-}
-
-if (process.env.ETHERSCAN_API_KEY) {
-  config.etherscan = {
-    // Your API key for Etherscan
-    // Obtain one at https://etherscan.io/
-    apiKey: process.env.ETHERSCAN_API_KEY,
-  }
 }
 
 export default config
