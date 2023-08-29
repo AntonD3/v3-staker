@@ -138,7 +138,10 @@ contract MockTimeUniswapV3Staker is IUniswapV3Staker, Multicall {
 
     /// @inheritdoc IUniswapV3Staker
     function endIncentive(IncentiveKey memory key) external override returns (uint256 refund) {
-        require(timeSimulator.blockTimestamp() >= key.endTime, 'UniswapV3Staker::endIncentive: cannot end incentive before end time');
+        require(
+            timeSimulator.blockTimestamp() >= key.endTime,
+            'UniswapV3Staker::endIncentive: cannot end incentive before end time'
+        );
 
         bytes32 incentiveId = IncentiveId.compute(key);
         Incentive storage incentive = incentives[incentiveId];
