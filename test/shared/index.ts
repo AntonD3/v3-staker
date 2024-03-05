@@ -105,7 +105,7 @@ export function encodePath(path: string[], fees: FeeAmount[]): string {
 export const MIN_SQRT_RATIO = BigNumber.from('4295128739')
 export const MAX_SQRT_RATIO = BigNumber.from('1461446703485210103287273052203988822378723970342')
 
-export const MAX_GAS_LIMIT = 12_450_000
+export const MAX_GAS_LIMIT = 80000000
 export const maxGas = {
   gasLimit: MAX_GAS_LIMIT,
 }
