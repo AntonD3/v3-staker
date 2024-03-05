@@ -17,18 +17,6 @@ jobs:
         with:
           node-version: 16.x
           registry-url: https://registry.npmjs.org
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-
-      - name: Install test node dependencies
-        run: |
-          sudo apt-get update && sudo apt-get install -y \
-            cmake pkg-config libssl-dev clang
-
-      - name: Install test node
-        run: |
-          cargo install --git https://github.com/matter-labs/era-test-node.git --locked
 
       - id: yarn-cache
         run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -49,10 +37,6 @@ jobs:
 
       # - name: Compile Uniswap V3 types
       #   run: yarn compile-uniswap-contract-types
-
-      - name: Run test node
-        run: |
-          era_test_node run &
 
       - name: Run tests
         run: yarn test

@@ -5,6 +5,7 @@ import '@nomiclabs/hardhat-etherscan'
 import 'hardhat-contract-sizer'
 import '@matterlabs/hardhat-zksync-solc'
 import '@matterlabs/hardhat-zksync-verify'
+import '@matterlabs/hardhat-zksync-node'
 
 import { subtask } from 'hardhat/config'
 import * as path from 'path'
@@ -32,9 +33,7 @@ subtask(TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS, async (_, { config }, runSuper) 
 
 const config: any = {
   networks: {
-    zkSyncTestNode: {
-      url: 'http://localhost:8011',
-      ethNetwork: '',
+    hardhat: {
       zksync: true,
     },
     zkSyncTestnet: {
@@ -43,6 +42,12 @@ const config: any = {
       zksync: true,
       verifyURL: 'https://zksync2-testnet-explorer.zksync.dev/contract_verification',
     },
+    zkSyncTestnetSepolia: {
+      url: 'https://sepolia.era.zksync.dev',
+      ethNetwork: `https://sepolia.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      zksync: true,
+      verifyURL: 'https://explorer.sepolia.era.zksync.dev/contract_verification',
+    },
     zkSyncMainnet: {
       url: 'https://mainnet.era.zksync.io',
       ethNetwork: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
@@ -50,7 +55,6 @@ const config: any = {
       verifyURL: 'https://zksync2-mainnet-explorer.zksync.io/contract_verification',
     },
   },
-  defaultNetwork: 'zkSyncTestNode',
   solidity: {
     version: '0.7.6',
   },
